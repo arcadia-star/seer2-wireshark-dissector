@@ -90,7 +90,7 @@ local function seer2msg_dissector_clientmsg(buffer, pinfo, tree)
     local userId = buffer(6, 4):le_uint()
     local sequenceIndex = buffer(10, 4):le_uint()
     local checksum = buffer(14, 4):le_uint()
-    local seer2msgbody = buffer(18):bytes()
+    local seer2msgbody = buffer(18)
 
     -- 将字段添加到 Wireshark 界面中
     subtree:add(f_length, length)
@@ -98,7 +98,6 @@ local function seer2msg_dissector_clientmsg(buffer, pinfo, tree)
     subtree:add(f_userId, userId)
     subtree:add(f_sequenceIndex, sequenceIndex)
     subtree:add(f_checksum, checksum)
-    subtree:add(f_seer2msgbody, buffer(18))
 
     -- 显示解析的信息
     pinfo.cols.protocol = "Seer2 Client Request(Cleartext)"
@@ -106,14 +105,15 @@ local function seer2msg_dissector_clientmsg(buffer, pinfo, tree)
         length, commandId, userId, sequenceIndex, checksum)
     
     -- 解析msgbody
+    local body_subtree = subtree:add(f_seer2msgbody, seer2msgbody, "Seer2 Client Request Cleartext Body Data")
     if commandId == 103 then
-        seer2msg_dissector_clientmsg_103(buffer:range(18), subtree)
+        seer2msg_dissector_clientmsg_103(seer2msgbody, subtree)
     elseif commandId == 111 then
-        seer2msg_dissector_clientmsg_111(buffer:range(18), subtree)
+        seer2msg_dissector_clientmsg_111(seer2msgbody, subtree)
     elseif commandId == 105 then
-        seer2msg_dissector_clientmsg_105(buffer:range(18), subtree)
+        seer2msg_dissector_clientmsg_105(seer2msgbody, subtree)
     elseif commandId == 106 then
-        seer2msg_dissector_clientmsg_106(buffer:range(18), subtree)
+        seer2msg_dissector_clientmsg_106(seer2msgbody, subtree)
     end
 end
 
@@ -169,7 +169,7 @@ local function seer2msg_dissector_servermsg(buffer, pinfo, tree)
     local userId = buffer(6, 4):le_uint()
     local sequenceIndex = buffer(10, 4):le_uint()
     local statusCode = buffer(14, 4):le_uint()
-    local seer2msgbody = buffer(18):bytes()
+    local seer2msgbody = buffer(18)
 
     -- 将字段添加到 Wireshark 界面中
     subtree:add(f_length, length)
@@ -177,7 +177,6 @@ local function seer2msg_dissector_servermsg(buffer, pinfo, tree)
     subtree:add(f_userId, userId)
     subtree:add(f_sequenceIndex, sequenceIndex)
     subtree:add(f_statusCode, statusCode)
-    subtree:add(f_seer2msgbody, buffer(18))
 
     -- 显示解析的信息
     pinfo.cols.protocol = "Seer2 Server Response(Cleartext)"
@@ -185,15 +184,15 @@ local function seer2msg_dissector_servermsg(buffer, pinfo, tree)
         length, commandId, userId, sequenceIndex, statusCode)
 
     -- 解析msgbody
-    local body_subtree = subtree:add(seer2msg_cleartext_proto, buffer:range(18), "Seer2 Server Response Cleartext Body Data")
+    local body_subtree = subtree:add(f_seer2msgbody, seer2msgbody, "Seer2 Server Response Cleartext Body Data")
     if commandId == 103 then
-        seer2msg_dissector_servermsg_103(buffer:range(18), body_subtree)
+        seer2msg_dissector_servermsg_103(seer2msgbody, body_subtree)
     elseif commandId == 111 then
-        seer2msg_dissector_servermsg_111(buffer:range(18), body_subtree)
+        seer2msg_dissector_servermsg_111(seer2msgbody, body_subtree)
     elseif commandId == 105 then
-        seer2msg_dissector_servermsg_105(buffer:range(18), body_subtree)
+        seer2msg_dissector_servermsg_105(seer2msgbody, body_subtree)
     elseif commandId == 106 then
-        seer2msg_dissector_servermsg_106(buffer:range(18), body_subtree)
+        seer2msg_dissector_servermsg_106(seer2msgbody, body_subtree)
     end
 end
 
