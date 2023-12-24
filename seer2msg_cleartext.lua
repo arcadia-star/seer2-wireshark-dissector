@@ -1,5 +1,10 @@
 -- wireshark_seer2msg_cleartext.lua
 
+-- 常量定义
+local loginserver_tel_ip = "118.89.150.43" -- http://ctsr2login.61.com/ip.txt
+local loginserver_cnc_ip = "118.89.150.23" -- http://cncsr2login.61.com/ip.txt
+local loginserver_port = 1863
+
 -- 创建协议
 seer2msg_cleartext_proto = Proto("seer2msg_cleartext", "Seer2 Message Cleartext")
 local f_length = ProtoField.uint32("seer2msg_cleartext.length", "Length", base.DEC, nil, nil, "little-endian")
@@ -241,4 +246,4 @@ end
 
 -- 将协议绑定到 TCP 端口
 local tcp_port = DissectorTable.get("tcp.port")
-tcp_port:add(1863, seer2msg_cleartext_proto)
+tcp_port:add(loginserver_port, seer2msg_cleartext_proto)
