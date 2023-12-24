@@ -1,3 +1,5 @@
+-- wireshark_seer2msg_ciphertext.lua
+
 -- 常量定义
 local onlineserver_tel_ip = Address.ipv4("118.89.150.183")
 local onlineserver_cnc_ip = Address.ipv4("118.89.149.189")
