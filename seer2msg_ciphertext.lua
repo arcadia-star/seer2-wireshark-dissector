@@ -2,6 +2,8 @@
 local onlineserver_tel_ip = Address.ipv4("118.89.150.183")
 local onlineserver_cnc_ip = Address.ipv4("118.89.149.189")
 local onlineserver_port = "1201-1276"
+local key = ByteArray.new("74616f6d65655f73656572325f6b5f7e23")
+local key_len = key:len()
 
 -- 创建一个新的协议
 seer2msg_ciphertext_proto = Proto("seer2msg_ciphertext", "Seer2 Message Ciphertext Protocol")
@@ -87,13 +89,10 @@ local function processMsg(buffer, pinfo, tree)
     end
 
     -- 解密逻辑：第二次处理
-    local key = ByteArray.new("74616f6d65655f73656572325f6b5f7e23")
-    local key_len = key:len()
     local decrypted_bytes = ByteArray.new()
     decrypted_bytes:set_size(decrypted_bytes_part1:len())
     for i = 0, decrypted_bytes_part1:len() - 1 do
         local ki = i % key_len
-        -- pinfo.cols.info:append(string.format("ki = %d ", ki))
         decrypted_bytes:set_index(i, bit.bxor(decrypted_bytes_part1:get_index(i), key:get_index(ki)))
     end
     local decrypted_bytes_tvb = decrypted_bytes:tvb()
@@ -102,7 +101,7 @@ local function processMsg(buffer, pinfo, tree)
     local decrypted_body_tree = subtree:add(decrypted_data_field, decrypted_bytes:tohex())
     decrypted_body_tree:set_generated()
 
-    -- 在协议详情中显示字段值，包括解密后的内容
+    -- 在协议详情中显示字段值
     pinfo.cols.protocol = "Seer2 Message (Ciphertext)"
     pinfo.cols.info = string.format("Seer2 Message Encrypted Protocol Length: %d, Command ID: %d", length, commandId)
 
