@@ -15,3 +15,11 @@ You can use the following filter names to filter game messages.
 + `seer2msg_ciphertext`
 
 you can use these filter names in wireshark filter input box.
+
+## Identify game connection
+
+currently,
+
+wireshark_seer2msg_cleartext.lua parse any tcp stream with remote port 1863.
+
+wireshark_seer2msg_cipertext.lua parse any tcp stream with remote port 1201-1276 and matched remote ip address.
