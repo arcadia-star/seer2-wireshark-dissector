@@ -26,16 +26,19 @@ SEER2MSG_CIPHERTEXT_PROTO.fields = FIELDS
 local function seer2msg_dissector_clientmsg(buffer, pinfo, tree)
     local subtree = tree:add(SEER2MSG_CIPHERTEXT_PROTO, buffer(), "Seer2 Client Ciphertext Request Data")
     -- 解析字段值
-    local userId = buffer(0, 4):le_uint()
-    local sequenceIndex = buffer(4, 4):le_uint()
-    local checksum = buffer(8, 4):le_uint()
-    local msgbody = buffer(12)
+    local range_userId = buffer(0, 4)
+    local range_sequenceIndex = buffer(4, 4)
+    local range_checksum = buffer(8, 4)
+    local range_msgbody = buffer(12)
+    local userId = range_userId:le_uint()
+    local sequenceIndex = range_sequenceIndex:le_uint()
+    local checksum = range_checksum:le_uint()
 
     -- 将字段添加到 Wireshark 界面中
-    subtree:add(FIELDS.USER_ID, userId)
-    subtree:add(FIELDS.SEQUENCE_INDEX, sequenceIndex)
-    subtree:add(FIELDS.CHECKSUM, checksum)
-    subtree:add(FIELDS.MSGBODY, msgbody)
+    subtree:add(FIELDS.USER_ID, range_userId, userId):set_generated()
+    subtree:add(FIELDS.SEQUENCE_INDEX, range_sequenceIndex, sequenceIndex):set_generated()
+    subtree:add(FIELDS.CHECKSUM, range_checksum, checksum):set_generated()
+    subtree:add(FIELDS.MSGBODY, range_msgbody):set_generated()
 
     -- 显示解析的信息
     pinfo.cols.protocol = "Seer2 Client Request(Ciphertext)"
@@ -46,16 +49,19 @@ end
 local function seer2msg_dissector_servermsg(buffer, pinfo, tree)
     local subtree = tree:add(SEER2MSG_CIPHERTEXT_PROTO, buffer(), "Seer2 Server Response Ciphertext Data")
     -- 解析字段值
-    local userId = buffer(0, 4):le_uint()
-    local sequenceIndex = buffer(4, 4):le_uint()
-    local statusCode = buffer(8, 4):le_uint()
-    local msgbody = buffer(12)
+    local range_userId = buffer(0, 4)
+    local range_sequenceIndex = buffer(4, 4)
+    local range_statusCode = buffer(8, 4)
+    local range_msgbody = buffer(12)
+    local userId = range_userId:le_uint()
+    local sequenceIndex = range_sequenceIndex:le_uint()
+    local statusCode = range_statusCode:le_uint()
 
     -- 将字段添加到 Wireshark 界面中
-    subtree:add(FIELDS.USER_ID, userId)
-    subtree:add(FIELDS.SEQUENCE_INDEX, sequenceIndex)
-    subtree:add(FIELDS.STATUS_CODE, statusCode)
-    subtree:add(FIELDS.MSGBODY, msgbody)
+    subtree:add(FIELDS.USER_ID, range_userId, userId):set_generated()
+    subtree:add(FIELDS.SEQUENCE_INDEX, range_sequenceIndex, sequenceIndex):set_generated()
+    subtree:add(FIELDS.STATUS_CODE, range_statusCode, statusCode):set_generated()
+    subtree:add(FIELDS.MSGBODY, range_msgbody):set_generated()
 
     -- 显示解析的信息
     pinfo.cols.protocol = "Seer2 Server Response(Ciphertext)"
@@ -67,16 +73,19 @@ local function processMsg(buffer, pinfo, tree)
     local subtree = tree:add(SEER2MSG_CIPHERTEXT_PROTO, buffer(), "Seer2 Message Encrypted")
 
     -- 解析字段
-    local length = buffer(0, 4):le_uint()
-    local commandId = buffer(4, 2):le_int()
-    local encrypted_bytes = buffer(6):bytes()
+    local range_length = buffer(0, 4)
+    local range_commandId = buffer(4, 2)
+    local range_encrypted_data = buffer(6)
+    local length = range_length:le_uint()
+    local commandId = range_commandId:le_int()
 
     -- 将字段添加到子树中
-    subtree:add(FIELDS.LENGTH, length):append_text(" bytes"):set_generated()
-    subtree:add(FIELDS.COMMAND_ID, commandId):set_generated()
-    subtree:add(FIELDS.ENCRYPTED_DATA, buffer(6)):set_generated()
+    subtree:add(FIELDS.LENGTH, range_length, length):append_text(" bytes"):set_generated()
+    subtree:add(FIELDS.COMMAND_ID, range_commandId, commandId):set_generated()
+    subtree:add(FIELDS.ENCRYPTED_DATA, range_encrypted_data):set_generated()
 
     -- 解密逻辑
+    local encrypted_bytes = buffer(6):bytes()
     local decrypted_bytes = ByteArray.new()
     decrypted_bytes:set_size(encrypted_bytes:len() - 1)
     for i = 0, decrypted_bytes:len() - 1 do
@@ -92,7 +101,7 @@ local function processMsg(buffer, pinfo, tree)
     local decrypted_bytes_tvb = decrypted_bytes:tvb()
 
     -- 将解密消息添加到子树中
-    local decrypted_body_tree = subtree:add(FIELDS.DECRYPTED_DATA, decrypted_bytes:tohex())
+    local decrypted_body_tree = subtree:add(FIELDS.DECRYPTED_DATA, decrypted_bytes_tvb(), decrypted_bytes:tohex())
     decrypted_body_tree:set_generated()
 
     -- 在协议详情中显示字段值
@@ -150,4 +159,4 @@ end
 
 -- 将协议与TCP端口关联
 tcp_table = DissectorTable.get("tcp.port")
-tcp_table:add(ONLINESERVER_PORT , SEER2MSG_CIPHERTEXT_PROTO)
+tcp_table:add(ONLINESERVER_PORT, SEER2MSG_CIPHERTEXT_PROTO)
