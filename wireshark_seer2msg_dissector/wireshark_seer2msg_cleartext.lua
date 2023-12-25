@@ -70,42 +70,47 @@ end
 local function seer2msg_dissector_clientmsg_105(buffer, tree)
     local subtree = tree:add(SEER2MSG_CLEARTEXT_105_PROTO, buffer(), "Seer2 Client Cleartext Request 105 Body Data")
     -- 解析字段值
-    local session = buffer(0, 16)
-    local tmcid = buffer(16, 4):le_int()
+    local range_session = buffer(0, 16)
+    local range_tmcid = buffer(16, 4)
 
     -- 将字段添加到 Wireshark 界面中
-    subtree:add(F_SESSION, session)
-    subtree:add(F_TMCID, tmcid)
+    subtree:add(F_SESSION, range_session)
+    subtree:add_le(F_TMCID, range_tmcid)
 end
 
 -- GetRangedServerList
 local function seer2msg_dissector_clientmsg_106(buffer, tree)
     local subtree = tree:add(SEER2MSG_CLEARTEXT_106_PROTO, buffer(), "Seer2 Client Cleartext Request 106 Body Data")
     -- 解析字段值
-    local startServerId = buffer(0, 2):le_uint()
-    local endServerId = buffer(2, 2):le_uint()
+    local range_startServerId = buffer(0, 2)
+    local range_endServerId = buffer(2, 2)
 
     -- 将字段添加到 Wireshark 界面中
-    subtree:add(F_106_START_SERVER_ID, startServerId)
-    subtree:add(F_106_END_SERVER_ID, endServerId)
+    subtree:add_le(F_106_START_SERVER_ID, range_startServerId)
+    subtree:add_le(F_106_END_SERVER_ID, range_endServerId)
 end
 
 local function seer2msg_dissector_clientmsg(buffer, pinfo, tree)
     local subtree = tree:add(SEER2MSG_CLEARTEXT_PROTO, buffer(), "Seer2 Client Cleartext Request Data")
     -- 解析字段值
-    local length = buffer(0, 4):le_uint()
-    local commandId = buffer(4, 2):le_uint()
-    local userId = buffer(6, 4):le_uint()
-    local sequenceIndex = buffer(10, 4):le_uint()
-    local checksum = buffer(14, 4):le_uint()
-    local msgbody = buffer(18)
+    local range_length = buffer(0, 4)
+    local range_commandId = buffer(4, 2)
+    local range_userId = buffer(6, 4)
+    local range_sequenceIndex = buffer(10, 4)
+    local range_checksum = buffer(14, 4)
+    local range_msgbody = buffer(18)
+    local length = range_length:le_uint()
+    local commandId = range_commandId:le_uint()
+    local userId = range_userId:le_uint()
+    local sequenceIndex = range_sequenceIndex:le_uint()
+    local checksum = range_checksum:le_uint()
 
     -- 将字段添加到 Wireshark 界面中
-    subtree:add(F_LENGTH, length)
-    subtree:add(F_COMMAND_ID, commandId)
-    subtree:add(F_USER_ID, userId)
-    subtree:add(F_SEQUENCE_INDEX, sequenceIndex)
-    subtree:add(F_CHECKSUM, checksum)
+    subtree:add(F_LENGTH, range_length, length)
+    subtree:add(F_COMMAND_ID, range_commandId, commandId)
+    subtree:add(F_USER_ID, range_userId, userId)
+    subtree:add(F_SEQUENCE_INDEX, range_sequenceIndex, sequenceIndex)
+    subtree:add(F_CHECKSUM, range_checksum, checksum)
 
     -- 显示解析的信息
     pinfo.cols.protocol = "Seer2 Client Request(Cleartext)"
@@ -113,15 +118,15 @@ local function seer2msg_dissector_clientmsg(buffer, pinfo, tree)
         length, commandId, userId, sequenceIndex, checksum)
     
     -- 解析msgbody
-    local body_subtree = subtree:add(F_MSGBODY, msgbody, "Seer2 Client Request Cleartext Body Data")
+    local body_subtree = subtree:add(F_MSGBODY, range_msgbody, "Seer2 Client Request Cleartext Body Data")
     if commandId == 103 then
-        seer2msg_dissector_clientmsg_103(msgbody, subtree)
+        seer2msg_dissector_clientmsg_103(range_msgbody, subtree)
     elseif commandId == 111 then
-        seer2msg_dissector_clientmsg_111(msgbody, subtree)
+        seer2msg_dissector_clientmsg_111(range_msgbody, subtree)
     elseif commandId == 105 then
-        seer2msg_dissector_clientmsg_105(msgbody, subtree)
+        seer2msg_dissector_clientmsg_105(range_msgbody, subtree)
     elseif commandId == 106 then
-        seer2msg_dissector_clientmsg_106(msgbody, subtree)
+        seer2msg_dissector_clientmsg_106(range_msgbody, subtree)
     end
 end
 
@@ -172,19 +177,24 @@ end
 local function seer2msg_dissector_servermsg(buffer, pinfo, tree)
     local subtree = tree:add(SEER2MSG_CLEARTEXT_PROTO, buffer(), "Seer2 Server Response Cleartext Data")
     -- 解析字段值
-    local length = buffer(0, 4):le_uint()
-    local commandId = buffer(4, 2):le_uint()
-    local userId = buffer(6, 4):le_uint()
-    local sequenceIndex = buffer(10, 4):le_uint()
-    local statusCode = buffer(14, 4):le_uint()
-    local msgbody = buffer(18)
+    local range_length = buffer(0, 4)
+    local range_commandId = buffer(4, 2)
+    local range_userId = buffer(6, 4)
+    local range_sequenceIndex = buffer(10, 4)
+    local range_statusCode = buffer(14, 4)
+    local range_msgbody = buffer(18)
+    local length = range_length:le_uint()
+    local commandId = range_commandId:le_uint()
+    local userId = range_userId:le_uint()
+    local sequenceIndex = range_sequenceIndex:le_uint()
+    local statusCode = range_statusCode:le_uint()
 
     -- 将字段添加到 Wireshark 界面中
-    subtree:add(F_LENGTH, length)
-    subtree:add(F_COMMAND_ID, commandId)
-    subtree:add(F_USER_ID, userId)
-    subtree:add(F_SEQUENCE_INDEX, sequenceIndex)
-    subtree:add(F_STATUS_CODE, statusCode)
+    subtree:add(F_LENGTH, range_length, length)
+    subtree:add(F_COMMAND_ID, range_commandId, commandId)
+    subtree:add(F_USER_ID, range_userId, userId)
+    subtree:add(F_SEQUENCE_INDEX, range_sequenceIndex, sequenceIndex)
+    subtree:add(F_STATUS_CODE, range_statusCode, statusCode)
 
     -- 显示解析的信息
     pinfo.cols.protocol = "Seer2 Server Response(Cleartext)"
@@ -192,15 +202,15 @@ local function seer2msg_dissector_servermsg(buffer, pinfo, tree)
         length, commandId, userId, sequenceIndex, statusCode)
 
     -- 解析msgbody
-    local body_subtree = subtree:add(F_MSGBODY, msgbody, "Seer2 Server Response Cleartext Body Data")
+    local body_subtree = subtree:add(F_MSGBODY, range_msgbody, "Seer2 Server Response Cleartext Body Data")
     if commandId == 103 then
-        seer2msg_dissector_servermsg_103(msgbody, body_subtree)
+        seer2msg_dissector_servermsg_103(range_msgbody, body_subtree)
     elseif commandId == 111 then
-        seer2msg_dissector_servermsg_111(msgbody, body_subtree)
+        seer2msg_dissector_servermsg_111(range_msgbody, body_subtree)
     elseif commandId == 105 then
-        seer2msg_dissector_servermsg_105(msgbody, body_subtree)
+        seer2msg_dissector_servermsg_105(range_msgbody, body_subtree)
     elseif commandId == 106 then
-        seer2msg_dissector_servermsg_106(msgbody, body_subtree)
+        seer2msg_dissector_servermsg_106(range_msgbody, body_subtree)
     end
 end
 
