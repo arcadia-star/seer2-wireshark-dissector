@@ -7,7 +7,7 @@
 
 You can use the following filter names to filter game messages.
 
-## Currently supported Filter list
+## Filters
 + `seer2msg_cleartext`
 + `seer2msg_cleartext_105`
 + `seer2msg_cleartext_106`
@@ -16,7 +16,11 @@ You can use the following filter names to filter game messages.
 
 you can use these filter names in wireshark filter input box.
 
-## Identify game connection
+## Supported Wireshark version
+
+Tested on wireshark v4.0.3
+
+## Rules to Identify game connection
 
 currently,
 
