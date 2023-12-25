@@ -68,7 +68,7 @@ local function seer2msg_dissector_clientmsg_111(buffer, tree)
 end
 
 local function seer2msg_dissector_clientmsg_105(buffer, tree)
-    local subtree = tree:add(SEER2MSG_CLEARTEXT_106_PROTO, buffer(), "Seer2 Client Cleartext Request 105 Body Data")
+    local subtree = tree:add(SEER2MSG_CLEARTEXT_105_PROTO, buffer(), "Seer2 Client Cleartext Request 105 Body Data")
     -- 解析字段值
     local session = buffer(0, 16)
     local tmcid = buffer(16, 4):le_int()
